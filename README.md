@@ -89,9 +89,18 @@ Test commands such as:
 myshell> ls -l
 myshell> pwd
 myshell> whoami
+myshell> echo Hello $HOME
+myshell> cat /etc/passwd | grep root
+myshell> ls > file.txt ; cat < file.txt
+myshell> sleep 5 &
+myshell> jobs
+myshell> if grep root /etc/passwd > /dev/null
+> then
+> echo "found"
+> fi
 ```
 
-To exit the shell, send an EOF signal (`Ctrl+D`).
+To exit the shell, send an EOF signal (`Ctrl+D`) or type `exit`.
 
 ### Cleaning Build Artifacts
 To remove compiled object files and binaries:
