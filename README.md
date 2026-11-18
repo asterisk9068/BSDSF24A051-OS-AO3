@@ -19,6 +19,10 @@ This project is an incremental implementation of a UNIX command-line interpreter
   - `exit [code]`: Terminates the shell gracefully.
   - `help`: Lists supported built-in commands.
   - `jobs`: Placeholder command for background job control.
+- **Release 3 (`v3` / Feature 3 - Command History)**:
+  - Command History Storage: In-memory history tracking for at least 20 commands (capacity 100).
+  - `history`: Built-in command listing previously executed commands with 1-based indexing.
+  - `!n` and `!!`: Re-executes the n-th command from history or the last command before tokenization.
 
 ## Directory Structure
 ```
@@ -26,10 +30,12 @@ BSDSF24A051-OS-AO3/
 ├── Makefile
 ├── README.md
 ├── include/
+│   ├── history.h
 │   └── shell.h
 └── src/
     ├── builtin.c
     ├── execute.c
+    ├── history.c
     ├── main.c
     └── shell.c
 ```

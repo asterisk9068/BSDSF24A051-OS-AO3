@@ -73,9 +73,22 @@ static int builtin_help(char **arglist) {
     printf("myshell - supported built-in commands:\n");
     printf("  cd [dir]    Change the current working directory.\n");
     printf("  pwd         Print current working directory.\n");
+    printf("  history     Display command history list.\n");
     printf("  help        Display this help message.\n");
     printf("  jobs        Display active jobs (placeholder).\n");
     printf("  exit [code] Exit the shell.\n");
+    return 1;
+}
+
+/**
+ * builtin_history - Displays command history.
+ * @arglist: Arguments array (unused).
+ *
+ * Return: 1 on completion.
+ */
+static int builtin_history(char **arglist) {
+    (void)arglist;
+    history_print();
     return 1;
 }
 
@@ -102,6 +115,8 @@ int handle_builtin(char **arglist) {
         return builtin_cd(arglist);
     } else if (strcmp(arglist[0], "pwd") == 0) {
         return builtin_pwd(arglist);
+    } else if (strcmp(arglist[0], "history") == 0) {
+        return builtin_history(arglist);
     } else if (strcmp(arglist[0], "help") == 0) {
         return builtin_help(arglist);
     } else if (strcmp(arglist[0], "jobs") == 0) {
