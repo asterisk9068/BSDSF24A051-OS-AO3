@@ -27,6 +27,11 @@ This project is an incremental implementation of a UNIX command-line interpreter
   - GNU Readline Integration: Replaces standard line reading with `readline()` for command line editing and history navigation.
   - Tab Completion: Auto-completion for built-in command names and current directory files via `rl_attempted_completion_function`.
   - Arrow Key History Navigation: Interactively cycles through previous commands via `add_history()`.
+- **Release 5 (`v5` / Feature 5 - I/O Redirection and Pipes)**:
+  - Output Redirection (`>` and `>>`): Redirects stdout to files with truncate or append mode using `open()`, `dup2()`, and `close()`.
+  - Input Redirection (`<`): Redirects stdin from files with error handling.
+  - Inter-Process Pipes (`|`): Connects stdout of one process to stdin of another across single or multi-stage pipelines using `pipe()` and `dup2()`.
+  - Built-in Redirection: Built-ins (`pwd`, `history`, `help`, etc.) seamlessly support input and output redirection.
 
 ## Directory Structure
 ```

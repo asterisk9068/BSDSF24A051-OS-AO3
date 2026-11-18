@@ -50,7 +50,6 @@ int main(int argc, char **argv) {
     (void)argv;
 
     char *cmdline = NULL;
-    char **arglist = NULL;
 
     sh_history_init();
 
@@ -103,17 +102,7 @@ int main(int argc, char **argv) {
         add_history(cmdline);
         sh_history_add(cmdline);
 
-        arglist = tokenize(cmdline);
-        if (arglist != NULL && arglist[0] != NULL) {
-            if (!handle_builtin(arglist)) {
-                execute(arglist);
-            }
-        }
-
-        if (arglist != NULL) {
-            free_tokens(arglist);
-            arglist = NULL;
-        }
+        execute_pipeline(cmdline);
 
         free(cmdline);
         cmdline = NULL;

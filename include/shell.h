@@ -39,6 +39,14 @@ char **tokenize(char *cmdline);
 int execute(char **arglist);
 
 /**
+ * execute_pipeline - Executes a command line supporting redirection (<, >) and pipes (|).
+ * @cmdline: The raw command line.
+ *
+ * Return: Exit status code of the final executed command.
+ */
+int execute_pipeline(char *cmdline);
+
+/**
  * free_tokens - Deallocates memory used by the token array.
  * @tokens: NULL-terminated array of tokens to free.
  */
