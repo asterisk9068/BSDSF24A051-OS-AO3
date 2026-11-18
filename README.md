@@ -8,14 +8,17 @@
 ## Overview
 This project is an incremental implementation of a UNIX command-line interpreter (shell) called `myshell`, developed as part of Operating Systems Programming Assignment 03 (PA-03).
 
-### Version: `v1.0-base` (Release 1 - The Base Shell)
-The base shell implements the foundational UNIX command execution cycle using POSIX system calls:
-1. **Command Reading (`read_cmd`)**: Prompts the user with `myshell> ` and reads input from standard input using `getline()`.
-2. **Tokenization (`tokenize`)**: Splits the command line into individual arguments delimited by whitespace.
-3. **Execution (`execute`)**:
-   - Creates a child process using `fork()`.
-   - In the child process, invokes `execvp()` to execute external binaries in the system's `PATH`.
-   - In the parent process, waits for the child process to complete using `waitpid()`.
+### Features Implemented
+- **Release 1 (`v1.0-base`)**:
+  - Command Reading (`read_cmd`): Prompts with `myshell> ` and reads input using `getline()`.
+  - Tokenization (`tokenize`): Parses command lines into whitespace-delimited tokens.
+  - Execution (`execute`): Executes external commands using `fork()`, `execvp()`, and `waitpid()`.
+- **Release 2 (`v2` / Feature 2 - Built-in Commands)**:
+  - `cd [dir]`: Changes current directory using `chdir()` (supports home directory when omitted or `~`, and error reporting).
+  - `pwd`: Displays current working directory using `getcwd()`.
+  - `exit [code]`: Terminates the shell gracefully.
+  - `help`: Lists supported built-in commands.
+  - `jobs`: Placeholder command for background job control.
 
 ## Directory Structure
 ```
@@ -25,6 +28,7 @@ BSDSF24A051-OS-AO3/
 ├── include/
 │   └── shell.h
 └── src/
+    ├── builtin.c
     ├── execute.c
     ├── main.c
     └── shell.c

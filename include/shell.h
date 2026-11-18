@@ -43,4 +43,12 @@ int execute(char **arglist);
  */
 void free_tokens(char **tokens);
 
+/**
+ * handle_builtin - Checks if command is a shell built-in and executes it.
+ * @arglist: NULL-terminated array of arguments (arglist[0] is command name).
+ *
+ * Return: 1 if command was a built-in and handled, 0 otherwise.
+ */
+int handle_builtin(char **arglist);
+
 #endif /* SHELL_H */

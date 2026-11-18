@@ -20,7 +20,9 @@ int main(int argc, char **argv) {
 
         arglist = tokenize(cmdline);
         if (arglist != NULL && arglist[0] != NULL) {
-            execute(arglist);
+            if (!handle_builtin(arglist)) {
+                execute(arglist);
+            }
         }
 
         if (arglist != NULL) {
