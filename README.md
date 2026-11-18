@@ -32,6 +32,11 @@ This project is an incremental implementation of a UNIX command-line interpreter
   - Input Redirection (`<`): Redirects stdin from files with error handling.
   - Inter-Process Pipes (`|`): Connects stdout of one process to stdin of another across single or multi-stage pipelines using `pipe()` and `dup2()`.
   - Built-in Redirection: Built-ins (`pwd`, `history`, `help`, etc.) seamlessly support input and output redirection.
+- **Release 6 (`v6` / Feature 6 - Command Chaining and Background Execution)**:
+  - Command Chaining (`;`): Executes multiple commands sequentially on a single line.
+  - Background Execution (`&`): Asynchronously launches commands in the background without blocking the parent shell.
+  - Non-blocking Zombie Reaper: Periodically reaps completed children via `waitpid(-1, &status, WNOHANG)`.
+  - `jobs`: Built-in command listing currently running background processes and their PIDs.
 
 ## Directory Structure
 ```
@@ -40,11 +45,13 @@ BSDSF24A051-OS-AO3/
 ├── README.md
 ├── include/
 │   ├── history.h
+│   ├── jobs.h
 │   └── shell.h
 └── src/
     ├── builtin.c
     ├── execute.c
     ├── history.c
+    ├── jobs.c
     ├── main.c
     └── shell.c
 ```

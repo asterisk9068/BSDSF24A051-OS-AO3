@@ -52,11 +52,14 @@ int main(int argc, char **argv) {
     char *cmdline = NULL;
 
     sh_history_init();
+    jobs_init();
 
     // Configure readline completion
     rl_attempted_completion_function = myshell_completion;
 
     while (1) {
+        jobs_reap();
+
         const char *prompt = isatty(STDIN_FILENO) ? PROMPT : "";
         cmdline = readline(prompt);
         if (cmdline == NULL) {
@@ -102,12 +105,13 @@ int main(int argc, char **argv) {
         add_history(cmdline);
         sh_history_add(cmdline);
 
-        execute_pipeline(cmdline);
+        execute_line(cmdline);
 
         free(cmdline);
         cmdline = NULL;
     }
 
+    jobs_free();
     sh_history_free();
 
     return 0;

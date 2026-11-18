@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "history.h"
+#include "jobs.h"
 
 #define MAX_LINE 1024
 #define MAX_ARGS 64
@@ -41,10 +42,19 @@ int execute(char **arglist);
 /**
  * execute_pipeline - Executes a command line supporting redirection (<, >) and pipes (|).
  * @cmdline: The raw command line.
+ * @is_background: 1 if job should run in background, 0 if foreground.
  *
  * Return: Exit status code of the final executed command.
  */
-int execute_pipeline(char *cmdline);
+int execute_pipeline(char *cmdline, int is_background);
+
+/**
+ * execute_line - Parses command chaining (;) and background execution (&) and runs commands.
+ * @cmdline: The input command line.
+ *
+ * Return: Exit status code of the last executed command.
+ */
+int execute_line(char *cmdline);
 
 /**
  * free_tokens - Deallocates memory used by the token array.

@@ -37,7 +37,6 @@ static char **tokenize_smart(const char *str) {
     const char *p = str;
 
     while (*p) {
-        // Skip whitespace
         while (*p && isspace((unsigned char)*p)) p++;
         if (!*p) break;
 
@@ -52,7 +51,6 @@ static char **tokenize_smart(const char *str) {
                 token_buf[tpos++] = *p++;
             }
         } else {
-            // Read until whitespace or redirection or pipe (unless in quotes)
             char quote = 0;
             while (*p) {
                 if (quote) {
@@ -157,11 +155,9 @@ int execute(char **arglist) {
     return 0;
 }
 
-static int execute_single(SimpleCommand *cmd) {
+static int execute_single(SimpleCommand *cmd, int is_background, const char *raw_cmd) {
     if (!cmd->argv || !cmd->argv[0]) return 0;
 
-    // Check if command is built-in
-    // We check built-in names: cd, exit, pwd, help, jobs, history
     const char *bnames[] = {"cd", "exit", "pwd", "help", "jobs", "history", NULL};
     int is_builtin = 0;
     for (int i = 0; bnames[i]; i++) {
@@ -171,7 +167,7 @@ static int execute_single(SimpleCommand *cmd) {
         }
     }
 
-    if (is_builtin) {
+    if (is_builtin && !is_background) {
         int saved_in = -1, saved_out = -1;
         if (cmd->input_file) {
             saved_in = dup(STDIN_FILENO);
@@ -211,7 +207,7 @@ static int execute_single(SimpleCommand *cmd) {
         return 0;
     }
 
-    // External command
+    // External command or background builtin
     pid_t pid = fork();
     if (pid < 0) {
         perror("myshell: fork failed");
@@ -237,26 +233,35 @@ static int execute_single(SimpleCommand *cmd) {
             close(fd);
         }
 
+        if (is_builtin) {
+            handle_builtin(cmd->argv);
+            exit(EXIT_SUCCESS);
+        }
+
         if (execvp(cmd->argv[0], cmd->argv) == -1) {
             perror(cmd->argv[0]);
             exit(EXIT_FAILURE);
         }
     } else {
-        int status;
-        if (waitpid(pid, &status, 0) == -1) {
-            perror("myshell: waitpid failed");
-            return -1;
+        if (is_background) {
+            jobs_add(pid, raw_cmd);
+            return 0;
+        } else {
+            int status;
+            if (waitpid(pid, &status, 0) == -1) {
+                perror("myshell: waitpid failed");
+                return -1;
+            }
+            return status;
         }
-        return status;
     }
 
     return 0;
 }
 
-int execute_pipeline(char *cmdline) {
+int execute_pipeline(char *cmdline, int is_background) {
     if (!cmdline || !*cmdline) return 0;
 
-    // Split cmdline by pipe '|' (respecting quotes)
     char *segments[MAX_ARGS];
     int num_segments = 0;
 
@@ -302,7 +307,7 @@ int execute_pipeline(char *cmdline) {
     }
 
     if (valid_cmds == 1) {
-        int ret = execute_single(&cmds[0]);
+        int ret = execute_single(&cmds[0], is_background, cmdline);
         free_simple_command(&cmds[0]);
         return ret;
     }
@@ -325,7 +330,6 @@ int execute_pipeline(char *cmdline) {
             perror("myshell: fork failed");
             return -1;
         } else if (pids[i] == 0) {
-            // Child process i
             if (i > 0) {
                 dup2(prev_read_fd, STDIN_FILENO);
                 close(prev_read_fd);
@@ -336,7 +340,6 @@ int execute_pipeline(char *cmdline) {
                 close(pipefd[0]);
             }
 
-            // Input redirection
             if (cmds[i].input_file) {
                 int fd = open(cmds[i].input_file, O_RDONLY);
                 if (fd < 0) {
@@ -346,7 +349,6 @@ int execute_pipeline(char *cmdline) {
                 dup2(fd, STDIN_FILENO);
                 close(fd);
             }
-            // Output redirection
             if (cmds[i].output_file) {
                 int flags = O_WRONLY | O_CREAT | (cmds[i].append ? O_APPEND : O_TRUNC);
                 int fd = open(cmds[i].output_file, flags, 0644);
@@ -367,7 +369,6 @@ int execute_pipeline(char *cmdline) {
                 exit(EXIT_FAILURE);
             }
         } else {
-            // Parent process
             if (i > 0) {
                 close(prev_read_fd);
             }
@@ -378,6 +379,14 @@ int execute_pipeline(char *cmdline) {
         }
     }
 
+    if (is_background) {
+        jobs_add(pids[valid_cmds - 1], cmdline);
+        for (int i = 0; i < valid_cmds; i++) {
+            free_simple_command(&cmds[i]);
+        }
+        return 0;
+    }
+
     int last_status = 0;
     for (int i = 0; i < valid_cmds; i++) {
         int status;
@@ -386,6 +395,70 @@ int execute_pipeline(char *cmdline) {
             last_status = status;
         }
         free_simple_command(&cmds[i]);
+    }
+
+    return last_status;
+}
+
+int execute_line(char *cmdline) {
+    if (!cmdline || !*cmdline) return 0;
+
+    // Split by ';' respecting quotes
+    char *cmds[MAX_ARGS];
+    int count = 0;
+
+    char buf[MAX_LINE];
+    int bpos = 0;
+    char quote = 0;
+    const char *p = cmdline;
+
+    while (*p) {
+        if (quote) {
+            if (*p == quote) quote = 0;
+            buf[bpos++] = *p++;
+        } else {
+            if (*p == '\'' || *p == '"') {
+                quote = *p;
+                buf[bpos++] = *p++;
+            } else if (*p == ';') {
+                buf[bpos] = '\0';
+                cmds[count++] = strdup(buf);
+                bpos = 0;
+                p++;
+                continue;
+            } else {
+                buf[bpos++] = *p++;
+            }
+        }
+    }
+    buf[bpos] = '\0';
+    cmds[count++] = strdup(buf);
+
+    int last_status = 0;
+    for (int i = 0; i < count; i++) {
+        char *str = cmds[i];
+        while (*str && isspace((unsigned char)*str)) str++;
+        if (*str) {
+            // Trim trailing whitespace
+            int len = strlen(str);
+            while (len > 0 && isspace((unsigned char)str[len - 1])) {
+                str[--len] = '\0';
+            }
+
+            int is_bg = 0;
+            if (len > 0 && str[len - 1] == '&') {
+                is_bg = 1;
+                str[--len] = '\0';
+                while (len > 0 && isspace((unsigned char)str[len - 1])) {
+                    str[--len] = '\0';
+                }
+            }
+
+            if (*str) {
+                last_status = execute_pipeline(str, is_bg);
+            }
+        }
+        free(cmds[i]);
     }
 
     return last_status;

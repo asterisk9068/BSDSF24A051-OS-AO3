@@ -75,7 +75,7 @@ static int builtin_help(char **arglist) {
     printf("  pwd         Print current working directory.\n");
     printf("  history     Display command history list.\n");
     printf("  help        Display this help message.\n");
-    printf("  jobs        Display active jobs (placeholder).\n");
+    printf("  jobs        Display active background jobs.\n");
     printf("  exit [code] Exit the shell.\n");
     return 1;
 }
@@ -93,14 +93,15 @@ static int builtin_history(char **arglist) {
 }
 
 /**
- * builtin_jobs - Placeholder for job control.
+ * builtin_jobs - Displays active background jobs.
  * @arglist: Arguments array (unused).
  *
  * Return: 1 on completion.
  */
 static int builtin_jobs(char **arglist) {
     (void)arglist;
-    printf("Job control not yet implemented.\n");
+    jobs_reap();
+    jobs_print();
     return 1;
 }
 
