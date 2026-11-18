@@ -1,0 +1,30 @@
+CC ?= gcc
+CFLAGS ?= -Wall -Wextra -Iinclude
+LDFLAGS ?=
+
+SRC_DIR = src
+OBJ_DIR = obj
+BIN_DIR = bin
+
+SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/shell.c $(SRC_DIR)/execute.c
+OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/shell.o $(OBJ_DIR)/execute.o
+TARGET = $(BIN_DIR)/myshell
+
+.PHONY: all clean
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS) | $(BIN_DIR)
+	$(CC) $(OBJS) $(LDFLAGS) -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c include/shell.h | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
+
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
+
+clean:
+	rm -rf $(OBJ_DIR) $(BIN_DIR)
