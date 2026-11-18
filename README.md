@@ -41,6 +41,11 @@ This project is an incremental implementation of a UNIX command-line interpreter
   - Multi-line Control Flow: Supports parsing and executing multi-line conditional blocks (`if`, `then`, `else`, `fi`).
   - Exit Status Inspection: Evaluates child termination codes using `WEXITSTATUS(status)` to branch execution.
   - Optional `else` block: Supports both full `if-then-else-fi` and `if-then-fi` conditionals.
+- **Release 8 (`v8` / Feature 8 - Shell Variables)**:
+  - Variable Assignment: Supports `VAR=value` syntax (without spaces) as a built-in action.
+  - Variable Expansion: Expands `$VAR` and `${VAR}` before command execution; falls back to environment variables.
+  - `set` Built-in: Displays all currently defined shell variables and their values.
+  - Linked List Storage: Variables stored in a singly-linked list of key-value pairs with memory-safe lifecycle management.
 
 ## Directory Structure
 ```
@@ -51,7 +56,8 @@ BSDSF24A051-OS-AO3/
 │   ├── control.h
 │   ├── history.h
 │   ├── jobs.h
-│   └── shell.h
+│   ├── shell.h
+│   └── variables.h
 └── src/
     ├── builtin.c
     ├── control.c
@@ -59,7 +65,8 @@ BSDSF24A051-OS-AO3/
     ├── history.c
     ├── jobs.c
     ├── main.c
-    └── shell.c
+    ├── shell.c
+    └── variables.c
 ```
 
 ## Compilation and Usage

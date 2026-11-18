@@ -74,9 +74,22 @@ static int builtin_help(char **arglist) {
     printf("  cd [dir]    Change the current working directory.\n");
     printf("  pwd         Print current working directory.\n");
     printf("  history     Display command history list.\n");
+    printf("  set         Display all shell variables.\n");
     printf("  help        Display this help message.\n");
     printf("  jobs        Display active background jobs.\n");
     printf("  exit [code] Exit the shell.\n");
+    return 1;
+}
+
+/**
+ * builtin_set - Displays all shell variables.
+ * @arglist: Arguments array (unused).
+ *
+ * Return: 1 on completion.
+ */
+static int builtin_set(char **arglist) {
+    (void)arglist;
+    var_print_all();
     return 1;
 }
 
@@ -118,6 +131,8 @@ int handle_builtin(char **arglist) {
         return builtin_pwd(arglist);
     } else if (strcmp(arglist[0], "history") == 0) {
         return builtin_history(arglist);
+    } else if (strcmp(arglist[0], "set") == 0) {
+        return builtin_set(arglist);
     } else if (strcmp(arglist[0], "help") == 0) {
         return builtin_help(arglist);
     } else if (strcmp(arglist[0], "jobs") == 0) {

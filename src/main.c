@@ -18,7 +18,7 @@ static int is_empty_line(const char *line) {
 static char *command_generator(const char *text, int state) {
     static int list_index, len;
     static const char *builtins[] = {
-        "cd", "pwd", "history", "help", "jobs", "exit", NULL
+        "cd", "pwd", "history", "set", "help", "jobs", "exit", NULL
     };
 
     if (!state) {
@@ -53,6 +53,7 @@ int main(int argc, char **argv) {
 
     sh_history_init();
     jobs_init();
+    var_init();
 
     // Configure readline completion
     rl_attempted_completion_function = myshell_completion;
@@ -115,6 +116,7 @@ int main(int argc, char **argv) {
         cmdline = NULL;
     }
 
+    var_free_all();
     jobs_free();
     sh_history_free();
 

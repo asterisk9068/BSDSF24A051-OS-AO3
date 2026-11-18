@@ -126,6 +126,23 @@ static int parse_simple_command(const char *cmd_str, SimpleCommand *cmd) {
     cmd->argv[argc] = NULL;
     free_tokens(raw_tokens);
 
+    // Variable expansion step
+    for (int i = 0; i < argc; i++) {
+        char *expanded = var_expand_string(cmd->argv[i]);
+        free(cmd->argv[i]);
+        cmd->argv[i] = expanded;
+    }
+    if (cmd->input_file) {
+        char *exp = var_expand_string(cmd->input_file);
+        free(cmd->input_file);
+        cmd->input_file = exp;
+    }
+    if (cmd->output_file) {
+        char *exp = var_expand_string(cmd->output_file);
+        free(cmd->output_file);
+        cmd->output_file = exp;
+    }
+
     return (argc > 0);
 }
 
@@ -158,7 +175,7 @@ int execute(char **arglist) {
 static int execute_single(SimpleCommand *cmd, int is_background, const char *raw_cmd) {
     if (!cmd->argv || !cmd->argv[0]) return 0;
 
-    const char *bnames[] = {"cd", "exit", "pwd", "help", "jobs", "history", NULL};
+    const char *bnames[] = {"cd", "exit", "pwd", "help", "jobs", "history", "set", NULL};
     int is_builtin = 0;
     for (int i = 0; bnames[i]; i++) {
         if (strcmp(cmd->argv[0], bnames[i]) == 0) {
@@ -466,7 +483,12 @@ int execute_line(char *cmdline) {
             }
 
             if (*str) {
-                last_status = execute_pipeline(str, is_bg);
+                if (is_assignment_statement(str)) {
+                    handle_assignment(str);
+                    last_status = 0;
+                } else {
+                    last_status = execute_pipeline(str, is_bg);
+                }
             }
         }
         free(cmds[i]);

@@ -10,6 +10,7 @@
 #include "history.h"
 #include "jobs.h"
 #include "control.h"
+#include "variables.h"
 
 #define MAX_LINE 1024
 #define MAX_ARGS 64
