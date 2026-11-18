@@ -1,6 +1,8 @@
 #define _POSIX_C_SOURCE 200809L
 #include "shell.h"
 #include <ctype.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 static int is_empty_line(const char *line) {
     if (line == NULL) return 1;
@@ -13,6 +15,36 @@ static int is_empty_line(const char *line) {
     return 1;
 }
 
+static char *command_generator(const char *text, int state) {
+    static int list_index, len;
+    static const char *builtins[] = {
+        "cd", "pwd", "history", "help", "jobs", "exit", NULL
+    };
+
+    if (!state) {
+        list_index = 0;
+        len = strlen(text);
+    }
+
+    const char *name;
+    while ((name = builtins[list_index++]) != NULL) {
+        if (strncmp(name, text, len) == 0) {
+            return strdup(name);
+        }
+    }
+    return NULL;
+}
+
+static char **myshell_completion(const char *text, int start, int end) {
+    (void)end;
+    char **matches = NULL;
+    if (start == 0) {
+        matches = rl_completion_matches(text, command_generator);
+    }
+    // If start > 0 or no builtin matched, returning NULL falls back to filename completion
+    return matches;
+}
+
 int main(int argc, char **argv) {
     (void)argc;
     (void)argv;
@@ -20,10 +52,14 @@ int main(int argc, char **argv) {
     char *cmdline = NULL;
     char **arglist = NULL;
 
-    history_init();
+    sh_history_init();
+
+    // Configure readline completion
+    rl_attempted_completion_function = myshell_completion;
 
     while (1) {
-        cmdline = read_cmd(PROMPT, stdin);
+        const char *prompt = isatty(STDIN_FILENO) ? PROMPT : "";
+        cmdline = readline(prompt);
         if (cmdline == NULL) {
             // EOF reached (Ctrl+D)
             if (isatty(STDIN_FILENO)) {
@@ -42,11 +78,11 @@ int main(int argc, char **argv) {
         if (cmdline[0] == '!') {
             const char *prev_cmd = NULL;
             if (cmdline[1] == '!') {
-                prev_cmd = history_get_last();
+                prev_cmd = sh_history_get_last();
             } else {
                 int n = atoi(cmdline + 1);
                 if (n > 0) {
-                    prev_cmd = history_get(n);
+                    prev_cmd = sh_history_get(n);
                 }
             }
 
@@ -63,8 +99,9 @@ int main(int argc, char **argv) {
             cmdline = expanded;
         }
 
-        // Add command to history
-        history_add(cmdline);
+        // Add to both readline history (for arrow keys) and custom history (for history builtin / !n)
+        add_history(cmdline);
+        sh_history_add(cmdline);
 
         arglist = tokenize(cmdline);
         if (arglist != NULL && arglist[0] != NULL) {
@@ -82,7 +119,7 @@ int main(int argc, char **argv) {
         cmdline = NULL;
     }
 
-    history_free();
+    sh_history_free();
 
     return 0;
 }

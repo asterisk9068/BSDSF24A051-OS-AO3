@@ -23,6 +23,10 @@ This project is an incremental implementation of a UNIX command-line interpreter
   - Command History Storage: In-memory history tracking for at least 20 commands (capacity 100).
   - `history`: Built-in command listing previously executed commands with 1-based indexing.
   - `!n` and `!!`: Re-executes the n-th command from history or the last command before tokenization.
+- **Release 4 (`v4` / Feature 4 - Tab Completion with Readline)**:
+  - GNU Readline Integration: Replaces standard line reading with `readline()` for command line editing and history navigation.
+  - Tab Completion: Auto-completion for built-in command names and current directory files via `rl_attempted_completion_function`.
+  - Arrow Key History Navigation: Interactively cycles through previous commands via `add_history()`.
 
 ## Directory Structure
 ```

@@ -13,7 +13,7 @@ static HistoryEntry history_entries[MAX_HISTORY];
 static int history_count = 0;
 static int total_commands_logged = 0;
 
-void history_init(void) {
+void sh_history_init(void) {
     history_count = 0;
     total_commands_logged = 0;
     for (int i = 0; i < MAX_HISTORY; i++) {
@@ -22,7 +22,7 @@ void history_init(void) {
     }
 }
 
-void history_add(const char *cmd) {
+void sh_history_add(const char *cmd) {
     if (cmd == NULL || *cmd == '\0') {
         return;
     }
@@ -44,13 +44,13 @@ void history_add(const char *cmd) {
     }
 }
 
-void history_print(void) {
+void sh_history_print(void) {
     for (int i = 0; i < history_count; i++) {
         printf("%4d  %s\n", history_entries[i].id, history_entries[i].cmd);
     }
 }
 
-const char *history_get(int n) {
+const char *sh_history_get(int n) {
     for (int i = 0; i < history_count; i++) {
         if (history_entries[i].id == n) {
             return history_entries[i].cmd;
@@ -59,14 +59,14 @@ const char *history_get(int n) {
     return NULL;
 }
 
-const char *history_get_last(void) {
+const char *sh_history_get_last(void) {
     if (history_count > 0) {
         return history_entries[history_count - 1].cmd;
     }
     return NULL;
 }
 
-void history_free(void) {
+void sh_history_free(void) {
     for (int i = 0; i < history_count; i++) {
         if (history_entries[i].cmd != NULL) {
             free(history_entries[i].cmd);

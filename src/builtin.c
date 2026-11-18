@@ -88,7 +88,7 @@ static int builtin_help(char **arglist) {
  */
 static int builtin_history(char **arglist) {
     (void)arglist;
-    history_print();
+    sh_history_print();
     return 1;
 }
 
