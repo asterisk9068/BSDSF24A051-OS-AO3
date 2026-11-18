@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 #include "history.h"
 #include "jobs.h"
+#include "control.h"
 
 #define MAX_LINE 1024
 #define MAX_ARGS 64

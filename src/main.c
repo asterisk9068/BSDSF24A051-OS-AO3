@@ -105,7 +105,11 @@ int main(int argc, char **argv) {
         add_history(cmdline);
         sh_history_add(cmdline);
 
-        execute_line(cmdline);
+        if (is_if_command(cmdline)) {
+            execute_if_block(cmdline);
+        } else {
+            execute_line(cmdline);
+        }
 
         free(cmdline);
         cmdline = NULL;

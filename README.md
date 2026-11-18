@@ -37,6 +37,10 @@ This project is an incremental implementation of a UNIX command-line interpreter
   - Background Execution (`&`): Asynchronously launches commands in the background without blocking the parent shell.
   - Non-blocking Zombie Reaper: Periodically reaps completed children via `waitpid(-1, &status, WNOHANG)`.
   - `jobs`: Built-in command listing currently running background processes and their PIDs.
+- **Release 7 (`v7` / Feature 7 - The if-then-else-fi Control Structure)**:
+  - Multi-line Control Flow: Supports parsing and executing multi-line conditional blocks (`if`, `then`, `else`, `fi`).
+  - Exit Status Inspection: Evaluates child termination codes using `WEXITSTATUS(status)` to branch execution.
+  - Optional `else` block: Supports both full `if-then-else-fi` and `if-then-fi` conditionals.
 
 ## Directory Structure
 ```
@@ -44,11 +48,13 @@ BSDSF24A051-OS-AO3/
 ├── Makefile
 ├── README.md
 ├── include/
+│   ├── control.h
 │   ├── history.h
 │   ├── jobs.h
 │   └── shell.h
 └── src/
     ├── builtin.c
+    ├── control.c
     ├── execute.c
     ├── history.c
     ├── jobs.c

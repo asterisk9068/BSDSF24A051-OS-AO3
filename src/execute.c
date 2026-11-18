@@ -252,6 +252,11 @@ static int execute_single(SimpleCommand *cmd, int is_background, const char *raw
                 perror("myshell: waitpid failed");
                 return -1;
             }
+            if (WIFEXITED(status)) {
+                return WEXITSTATUS(status);
+            } else if (WIFSIGNALED(status)) {
+                return 128 + WTERMSIG(status);
+            }
             return status;
         }
     }
@@ -392,7 +397,13 @@ int execute_pipeline(char *cmdline, int is_background) {
         int status;
         waitpid(pids[i], &status, 0);
         if (i == valid_cmds - 1) {
-            last_status = status;
+            if (WIFEXITED(status)) {
+                last_status = WEXITSTATUS(status);
+            } else if (WIFSIGNALED(status)) {
+                last_status = 128 + WTERMSIG(status);
+            } else {
+                last_status = status;
+            }
         }
         free_simple_command(&cmds[i]);
     }
